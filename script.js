@@ -2,6 +2,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const timerElement = document.getElementById('timer');
+const playButton = document.getElementById('playButton');
 
 // Ustawienia kanwy
 canvas.width = window.innerWidth;
@@ -81,7 +82,9 @@ function Fruit() {
 
 // Funkcja rysująca owoc
 function drawFruit(fruit) {
-    ctx.drawImage(fruit.image, fruit.x, fruit.y, fruit.size, fruit.size);
+    if (fruit.image.complete) {  // Sprawdź, czy obrazek jest załadowany
+        ctx.drawImage(fruit.image, fruit.x, fruit.y, fruit.size, fruit.size);
+    }
 }
 
 // Funkcja aktualizacji gry
@@ -132,6 +135,8 @@ function startTimer() {
 function startGame() {
     loadImages()
         .then(() => {
+            document.getElementById('home').style.display = 'none';  // Ukryj sekcję startową
+            document.getElementById('game').style.display = 'flex';  // Pokaż sekcję gry
             startTimer();
             update();
         })
@@ -158,5 +163,7 @@ canvas.addEventListener('click', (e) => {
     });
 });
 
-// Uruchom grę
-startGame();
+// Obsługuje kliknięcia przycisku "Play"
+playButton.addEventListener('click', () => {
+    startGame();  // Uruchom grę po kliknięciu przycisku
+});

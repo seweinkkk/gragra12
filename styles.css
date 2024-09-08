@@ -16,7 +16,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('images/background.png'); /* Upewnij się, że ścieżka jest poprawna */
+    background-image: url('images/background.png'); /* Upewnij się, że rozszerzenie jest poprawne */
     background-size: cover;
     background-position: center;
     z-index: -1;
@@ -50,8 +50,15 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* Wyśrodkowanie zawartości w pionie */
+    display: none; /* Ukrywa sekcję gry na początku */
 }
 
 #gameCanvas {
     border: 1px solid #000;
+}
+
+#score, #timer {
+    font-size: 24px;
+    color: white;
 }
