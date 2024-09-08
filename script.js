@@ -12,41 +12,43 @@ let timer = 30;
 let gameOver = false;
 
 // Ścieżki do obrazków
-const backgroundImageSrc = 'images/background.png';  // Poprawne rozszerzenie pliku
+const backgroundImageSrc = 'images/background.png';  // Poprawione rozszerzenie
 const fruitImages = [
     'images/apple.png',
     'images/banana.png',
     'images/pear.png'
 ];
 
-let backgroundImage;
-let images = {};
+// Załaduj obrazki
+const images = {};
+fruitImages.forEach(src => {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => images[src] = img;
+    img.onerror = () => console.error(`Failed to load image: ${src}`);
+});
+const backgroundImage = new Image();
+backgroundImage.src = backgroundImageSrc;
+backgroundImage.onload = () => console.log('Background image loaded');
+backgroundImage.onerror = () => console.error(`Failed to load background image: ${backgroundImageSrc}`);
 
-// Funkcja do ładowania obrazka
-function loadImage(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error(`Failed to load image at ${src}`));
-        img.src = src;
-    });
+// Funkcja do losowego wyboru obrazka
+function getRandomFruitImage() {
+    const randomIndex = Math.floor(Math.random() * fruitImages.length);
+    return fruitImages[randomIndex];
 }
 
-// Funkcja do wstępnego ładowania obrazków
-async function preloadImages() {
-    try {
-        backgroundImage = await loadImage(backgroundImageSrc);
-        for (const fruitSrc of fruitImages) {
-            const img = await loadImage(fruitSrc);
-            images[fruitSrc] = img;
-        }
-        startGame();  // Uruchom grę po załadowaniu obrazków
-    } catch (error) {
-        console.error(error);
-    }
+function Fruit() {
+    this.x = Math.random() * canvas.width;
+    this.y = -50;
+    this.size = 30;
+    this.imageSrc = getRandomFruitImage();
+    this.image = new Image();
+    this.image.src = this.imageSrc;
+    this.image.onload = () => console.log(`Fruit image loaded: ${this.imageSrc}`);
+    this.image.onerror = () => console.error(`Failed to load fruit image: ${this.imageSrc}`);
 }
 
-// Funkcja rysująca owoc na kanwie
 function drawFruit(fruit) {
     const img = images[fruit.imageSrc];
     if (img) {
@@ -56,24 +58,25 @@ function drawFruit(fruit) {
     }
 }
 
-// Funkcja do aktualizacji stanu gry
 function update() {
     if (gameOver) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);  // Rysowanie tła
+    if (backgroundImage) {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);  // Rysowanie tła
+    }
 
     fruits.forEach((fruit, index) => {
-        fruit.y += 3;
+        fruit.y += 3; // Przesuwanie owoców w dół
         if (fruit.y > canvas.height) {
-            fruits.splice(index, 1);
+            fruits.splice(index, 1); // Usuwanie owoców, które spadły poza ekran
         } else {
-            drawFruit(fruit);
+            drawFruit(fruit); // Rysowanie owoców
         }
     });
 
     if (Math.random() < 0.02) {
-        fruits.push(new Fruit());
+        fruits.push(new Fruit()); // Dodawanie nowych owoców losowo
     }
 
     if (timer <= 0) {
@@ -88,10 +91,9 @@ function update() {
         return;
     }
 
-    requestAnimationFrame(update);
+    requestAnimationFrame(update); // Kontynuowanie aktualizacji gry
 }
 
-// Funkcja do startu timera
 function startTimer() {
     setInterval(() => {
         if (timer > 0) {
@@ -101,21 +103,6 @@ function startTimer() {
     }, 1000);
 }
 
-// Klasa do reprezentacji owoców
-function Fruit() {
-    this.x = Math.random() * canvas.width;
-    this.y = -50;
-    this.size = 30;
-    this.imageSrc = getRandomFruitImage();  // Losowy obrazek owocu
-}
-
-// Funkcja losująca obrazek owocu
-function getRandomFruitImage() {
-    const randomIndex = Math.floor(Math.random() * fruitImages.length);
-    return fruitImages[randomIndex];
-}
-
-// Funkcja obsługująca kliknięcia na kanwie
 canvas.addEventListener('click', (e) => {
     if (gameOver) return;
 
@@ -123,15 +110,25 @@ canvas.addEventListener('click', (e) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    fruits = fruits.filter(fruit => {
-        if (x >= fruit.x && x <= fruit.x + fruit.size && y >= fruit.y && y <= fruit.y + fruit.size) {
+    fruits.forEach((fruit, index) => {
+        if (x > fruit.x && x < fruit.x + fruit.size && y > fruit.y && y < fruit.y + fruit.size) {
             score++;
             scoreElement.innerText = 'Score: ' + score;
-            return false;
+            fruits.splice(index, 1); // Usuwanie klikniętego owocu
         }
-        return true;
     });
 });
 
-// Rozpocznij grę
-preloadImages();
+function startGame() {
+    score = 0;
+    timer = 30;
+    gameOver = false;
+    fruits = [];
+    scoreElement.innerText = 'Score: ' + score;
+    timerElement.innerText = 'Time: ' + timer;
+    startTimer();
+    update(); // Rozpoczęcie aktualizacji gry
+}
+
+// Uruchomienie gry po załadowaniu strony
+window.onload = startGame;
