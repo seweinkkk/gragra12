@@ -1,5 +1,17 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const scoreElement = document.getElementById('score');
+const timerElement = document.getElementById('timer');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let score = 0;
+let fruits = [];
+let timer = 30;
+let gameOver = false;
+
+// Ścieżki do obrazków
 const backgroundImageSrc = 'images/background.png';  // Poprawne rozszerzenie pliku
 const fruitImages = [
     'images/apple.png',
@@ -8,11 +20,7 @@ const fruitImages = [
 ];
 
 let backgroundImage;
-let fruits = [];
 let images = {};
-let score = 0;
-let timer = 30;
-let gameOver = false;
 
 // Funkcja do ładowania obrazka
 function loadImage(src) {
@@ -99,7 +107,6 @@ function Fruit() {
     this.y = -50;
     this.size = 30;
     this.imageSrc = getRandomFruitImage();  // Losowy obrazek owocu
-    this.image = images[this.imageSrc];  // Przypisz załadowany obrazek
 }
 
 // Funkcja losująca obrazek owocu
