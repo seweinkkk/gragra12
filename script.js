@@ -19,18 +19,33 @@ const fruitImages = [
     'images/pear.png'
 ];
 
-// Załaduj obrazki
+// Funkcja do ładowania obrazków jako obietnic
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load image at ${src}`));
+    });
+}
+
+// Załaduj wszystkie obrazki
+Promise.all(fruitImages.map(loadImage))
+    .then(imagesArray => {
+        imagesArray.forEach((img, index) => {
+            images[fruitImages[index]] = img;
+        });
+        console.log('Fruit images loaded');
+    })
+    .catch(error => console.error(error));
+
 const images = {};
-fruitImages.forEach(src => {
-    const img = new Image();
-    img.src = src;
-    img.onload = () => images[src] = img;
-    img.onerror = () => console.error(`Failed to load image: ${src}`);
-});
-const backgroundImage = new Image();
-backgroundImage.src = backgroundImageSrc;
-backgroundImage.onload = () => console.log('Background image loaded');
-backgroundImage.onerror = () => console.error(`Failed to load background image: ${backgroundImageSrc}`);
+loadImage(backgroundImageSrc)
+    .then(img => {
+        backgroundImage = img;
+        console.log('Background image loaded');
+    })
+    .catch(error => console.error(error));
 
 // Funkcja do losowego wyboru obrazka
 function getRandomFruitImage() {
