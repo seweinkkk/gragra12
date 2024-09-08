@@ -18,44 +18,42 @@ const fruitImages = [
     'images/pear.png'
 ];
 
+// Ścieżka do tła
+const backgroundImageSrc = 'images/background.png';  // Zmieniono rozszerzenie na .png
+
 // Funkcja do losowego wyboru obrazka
 function getRandomFruitImage() {
     const randomIndex = Math.floor(Math.random() * fruitImages.length);
     return fruitImages[randomIndex];
 }
 
-// Klasa owoców
 function Fruit() {
     this.x = Math.random() * canvas.width;
     this.y = -50;
     this.size = 30;
     this.image = new Image();
-    this.image.src = getRandomFruitImage();
-    
-    // Sprawdź, czy obrazek został załadowany
-    this.image.onload = () => {
-        console.log('Obrazek załadowany:', this.image.src);
-    };
-
-    // Obsłuż błąd ładowania obrazka
-    this.image.onerror = () => {
-        console.error('Błąd ładowania obrazka:', this.image.src);
-    };
+    this.image.src = getRandomFruitImage(); // Losowo wybiera obrazek
 }
 
 function drawFruit(fruit) {
-    if (fruit.image.complete && fruit.image.naturalWidth !== 0) {
-        ctx.drawImage(fruit.image, fruit.x, fruit.y, fruit.size, fruit.size);
-    } else {
-        console.error('Obrazek jest uszkodzony lub nie został załadowany:', fruit.image.src);
-    }
+    ctx.drawImage(fruit.image, fruit.x, fruit.y, fruit.size, fruit.size);
+}
+
+function drawBackground() {
+    const backgroundImage = new Image();
+    backgroundImage.src = backgroundImageSrc;
+    backgroundImage.onload = function() {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    };
 }
 
 function update() {
     if (gameOver) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Rysowanie tła
+    drawBackground();
 
+    // Rysowanie owoców
     fruits.forEach((fruit, index) => {
         fruit.y += 3;
         if (fruit.y > canvas.height) {
