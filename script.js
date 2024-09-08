@@ -1,59 +1,53 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const scoreElement = document.getElementById('score');
-const timerElement = document.getElementById('timer');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let score = 0;
-let fruits = [];
-let timer = 30;
-let gameOver = false;
-
-// Tablica z nazwami obrazków
+const backgroundImageSrc = 'images/background.png';  // Używaj poprawnego rozszerzenia
 const fruitImages = [
     'images/apple.png',
     'images/banana.png',
     'images/pear.png'
 ];
 
-// Ścieżka do tła
-const backgroundImageSrc = 'images/background.png';  // Zmieniono rozszerzenie na .png
+let backgroundImage;
+let fruits = [];
+let images = {};
 
-// Funkcja do losowego wyboru obrazka
-function getRandomFruitImage() {
-    const randomIndex = Math.floor(Math.random() * fruitImages.length);
-    return fruitImages[randomIndex];
+async function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load image at ${src}`));
+        img.src = src;
+    });
 }
 
-function Fruit() {
-    this.x = Math.random() * canvas.width;
-    this.y = -50;
-    this.size = 30;
-    this.image = new Image();
-    this.image.src = getRandomFruitImage(); // Losowo wybiera obrazek
+async function preloadImages() {
+    try {
+        backgroundImage = await loadImage(backgroundImageSrc);
+        for (const fruitSrc of fruitImages) {
+            const img = await loadImage(fruitSrc);
+            images[fruitSrc] = img;
+        }
+        startGame();  // Uruchom grę po załadowaniu obrazków
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 function drawFruit(fruit) {
-    ctx.drawImage(fruit.image, fruit.x, fruit.y, fruit.size, fruit.size);
-}
-
-function drawBackground() {
-    const backgroundImage = new Image();
-    backgroundImage.src = backgroundImageSrc;
-    backgroundImage.onload = function() {
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-    };
+    const img = images[fruit.imageSrc];
+    if (img) {
+        ctx.drawImage(img, fruit.x, fruit.y, fruit.size, fruit.size);
+    } else {
+        console.error(`Image not found: ${fruit.imageSrc}`);
+    }
 }
 
 function update() {
     if (gameOver) return;
 
-    // Rysowanie tła
-    drawBackground();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-    // Rysowanie owoców
     fruits.forEach((fruit, index) => {
         fruit.y += 3;
         if (fruit.y > canvas.height) {
@@ -82,31 +76,9 @@ function update() {
     requestAnimationFrame(update);
 }
 
-function startTimer() {
-    setInterval(() => {
-        if (timer > 0) {
-            timer--;
-            timerElement.innerText = 'Time: ' + timer;
-        }
-    }, 1000);
+function startGame() {
+    startTimer();
+    update();
 }
 
-canvas.addEventListener('click', (e) => {
-    if (gameOver) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    fruits = fruits.filter(fruit => {
-        if (x >= fruit.x && x <= fruit.x + fruit.size && y >= fruit.y && y <= fruit.y + fruit.size) {
-            score++;
-            scoreElement.innerText = 'Score: ' + score;
-            return false;
-        }
-        return true;
-    });
-});
-
-startTimer();
-update();
+preloadImages();
