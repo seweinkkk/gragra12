@@ -3,19 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gra na Telegramie</title>
+    <title>Advanced Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="container">
-        <div id="menu">
-            <button id="homeButton">Home</button>
-            <button id="tasksButton">Tasks</button>
-        </div>
-        <div id="content">
-            <!-- Content will be injected here -->
+    <!-- Sekcja Home -->
+    <div id="home">
+        <div id="background"></div>
+        <div id="home-content">
+            <h1>Welcome to the Fruit Catcher Game!</h1>
+            <button id="playButton">Play</button>
         </div>
     </div>
+    
+    <!-- Sekcja Gry -->
+    <div id="game" style="display: none;">
+        <canvas id="gameCanvas"></canvas>
+        <div id="score">Score: 0</div>
+        <div id="timer">Time: 30</div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
